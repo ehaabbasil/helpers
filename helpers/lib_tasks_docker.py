@@ -94,6 +94,7 @@ def _get_last_container_id(sudo: bool) -> str:
     # 90897241b31a   eeb33fe1880a   "/bin/sh -c '/bin/bash ...
     _, txt = hsystem.system_to_one_line(cmd)
     # Parse the output: there should be at least one line.
+    
     hdbg.dassert_lte(1, len(txt.split(" ")), "Invalid output='%s'", txt)
     container_id: str = txt.split(" ")[0]
     return container_id
