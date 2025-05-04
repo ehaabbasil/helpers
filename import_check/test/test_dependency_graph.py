@@ -12,7 +12,8 @@ from import_check.dependency_graph import DependencyGraph
 
 @pytest.fixture
 def test_dir():
-    """Create a temporary directory with test files and clean up after.
+    """
+    Create a temporary directory with test files and clean up after.
 
     Yields:
         Path: Path to the temporary directory.
@@ -34,16 +35,26 @@ def test_dir():
     shutil.rmtree(dir_path, ignore_errors=True)
 
 
+# #############################################################################
+# TestDependencyGraph
+# #############################################################################
+
+
 class TestDependencyGraph:
+
     def test_no_dependencies(self, test_dir: Path) -> None:
-        """Verify a module with no imports has no dependencies."""
+        """
+        Verify a module with no imports has no dependencies.
+        """
         graph = DependencyGraph(str(test_dir))
         graph.build_graph()
         report = graph.get_text_report()
         assert f"{test_dir}/module_a.py has no dependencies" in report
 
     def test_multiple_dependencies(self, test_dir: Path) -> None:
-        """Verify modules with chained dependencies are reported correctly."""
+        """
+        Verify modules with chained dependencies are reported correctly.
+        """
         graph = DependencyGraph(str(test_dir))
         graph.build_graph()
         report = graph.get_text_report()
@@ -51,7 +62,9 @@ class TestDependencyGraph:
         assert f"{test_dir}/module_b.py imports {test_dir}/module_a.py" in report
 
     def test_circular_dependencies(self, test_dir: Path) -> None:
-        """Verify cyclic dependencies are identified correctly."""
+        """
+        Verify cyclic dependencies are identified correctly.
+        """
         graph = DependencyGraph(str(test_dir))
         graph.build_graph()
         report = graph.get_text_report()
@@ -59,7 +72,9 @@ class TestDependencyGraph:
         assert f"{test_dir}/module_e.py imports {test_dir}/module_d.py" in report
 
     def test_dot_output(self, test_dir: Path) -> None:
-        """Verify the DOT file is generated with correct format."""
+        """
+        Verify the DOT file is generated with correct format.
+        """
         graph = DependencyGraph(str(test_dir))
         graph.build_graph()
         output_file = "dependency_graph.dot"
@@ -70,7 +85,9 @@ class TestDependencyGraph:
         assert "digraph" in content
 
     def test_syntax_error_handling(self, test_dir: Path) -> None:
-        """Verify syntax errors in files are handled without crashing."""
+        """
+        Verify syntax errors in files are handled without crashing.
+        """
         with open(test_dir / "module_invalid.py", "w") as f:
             f.write("def invalid_syntax()  # Missing colon\n")
         graph = DependencyGraph(str(test_dir))
@@ -79,7 +96,9 @@ class TestDependencyGraph:
         assert f"{test_dir}/module_a.py has no dependencies" in report
 
     def test_import_directory_only(self, test_dir: Path) -> None:
-        """Verify importing only the directory name resolves to __init__.py."""
+        """
+        Verify importing only the directory name resolves to __init__.py.
+        """
         # Create __init__.py in the test directory
         with open(test_dir / "__init__.py", "w") as f:
             f.write("")
@@ -92,7 +111,9 @@ class TestDependencyGraph:
         assert f"{test_dir}/module_f.py imports {test_dir}/__init__.py" in report
 
     def test_package_only_import(self) -> None:
-        """Verify importing a package with only __init__.py adds a dependency."""
+        """
+        Verify importing a package with only __init__.py adds a dependency.
+        """
         package_dir = Path("package_only_tmp")
         package_dir.mkdir(exist_ok=True)
         subdir = package_dir / "subpackage"
@@ -105,12 +126,17 @@ class TestDependencyGraph:
             graph = DependencyGraph(str(package_dir))
             graph.build_graph()
             report = graph.get_text_report()
-            assert f"{package_dir}/module_b.py imports {package_dir}/subpackage/__init__.py" in report
+            assert (
+                f"{package_dir}/module_b.py imports {package_dir}/subpackage/__init__.py"
+                in report
+            )
         finally:
             shutil.rmtree(package_dir)
 
     def test_package_import(self) -> None:
-        """Verify nested package imports resolve to __init__.py."""
+        """
+        Verify nested package imports resolve to __init__.py.
+        """
         package_dir = Path("package_tmp")
         package_dir.mkdir(exist_ok=True)
         subdir = package_dir / "subpackage"
@@ -131,12 +157,17 @@ class TestDependencyGraph:
             graph = DependencyGraph(str(package_dir))
             graph.build_graph()
             report = graph.get_text_report()
-            assert f"{package_dir}/module_b.py imports {package_dir}/subpackage/subsubpackage/module_a/__init__.py" in report
+            assert (
+                f"{package_dir}/module_b.py imports {package_dir}/subpackage/subsubpackage/module_a/__init__.py"
+                in report
+            )
         finally:
             shutil.rmtree(package_dir)
 
     def test_unresolved_nested_import(self) -> None:
-        """Verify unresolved nested imports result in no dependencies."""
+        """
+        Verify unresolved nested imports result in no dependencies.
+        """
         package_dir = Path("unresolved_tmp")
         package_dir.mkdir(exist_ok=True)
         subdir = package_dir / "subpackage"
@@ -153,19 +184,20 @@ class TestDependencyGraph:
         finally:
             shutil.rmtree(package_dir)
 
-    def test_show_cycles_filters_cyclic_dependencies(self, test_dir: Path) -> None:
-        """Verify show_cycles=True filters the graph to only cyclic dependencies."""
+    def test_show_cycles_filters_cyclic_dependencies(
+        self, test_dir: Path
+    ) -> None:
+        """
+        Verify show_cycles=True filters the graph to only cyclic dependencies.
+        """
         # Create a module with no imports to ensure it's filtered out
         with open(test_dir / "module_f.py", "w") as f:
             f.write("# No imports\n")
-
         # Build the graph with show_cycles=True
         graph = DependencyGraph(str(test_dir), show_cycles=True)
         graph.build_graph()
-
         # Get the text report
         report = graph.get_text_report()
-
         # Expected output: Only cyclic dependencies (module_d and module_e) should be shown
         assert f"{test_dir}/module_d.py imports {test_dir}/module_e.py" in report
         assert f"{test_dir}/module_e.py imports {test_dir}/module_d.py" in report

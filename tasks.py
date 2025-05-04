@@ -1,9 +1,8 @@
 import logging
 import os
 from typing import Any
-from invoke import task 
 
-
+from invoke import task
 
 import helpers.repo_config_utils as hrecouti
 
@@ -136,7 +135,6 @@ except ImportError:
     pass
 from import_check.dependency_graph import DependencyGraph
 
-
 # # TODO(gp): This is due to the coupling between code in linter container and
 # #  the code being linted.
 # try:
@@ -180,8 +178,16 @@ def _run_qa_tests(ctx: Any, stage: str, version: str) -> bool:
 
 
 @task
-def show_deps(c, directory=".", format="text", output_file=None, max_level=None, show_cycles=False):
-    """Generate a dependency report for a specified directory.
+def show_deps(
+    c,
+    directory=".",
+    format="text",
+    output_file=None,
+    max_level=None,
+    show_cycles=False,
+):
+    """
+    Generate a dependency report for a specified directory.
 
     Args:
         c: Invoke context (required by invoke, unused).
@@ -198,10 +204,10 @@ def show_deps(c, directory=".", format="text", output_file=None, max_level=None,
     max_level = int(max_level) if max_level is not None else None
     # Convert show_cycles to bool
     show_cycles = show_cycles in (True, "True", "true", "1")
-
-    graph = DependencyGraph(directory, max_level=max_level, show_cycles=show_cycles)
+    graph = DependencyGraph(
+        directory, max_level=max_level, show_cycles=show_cycles
+    )
     graph.build_graph()
-
     if format == "text":
         report = graph.get_text_report()
         if output_file:
@@ -218,6 +224,7 @@ def show_deps(c, directory=".", format="text", output_file=None, max_level=None,
     else:
         raise ValueError(f"Unsupported format: {format}")
 
+
 default_params = {
     # TODO(Nikola): Remove prefix after everything is cleaned.
     #   Currently there are a lot dependencies on prefix.
@@ -232,5 +239,3 @@ default_params = {
 
 set_default_params(default_params)
 parse_command_line()
-
-

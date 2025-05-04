@@ -1,5 +1,6 @@
-from import_check.dependency_graph import DependencyGraph
 import networkx as nx
+
+from import_check.dependency_graph import DependencyGraph
 
 # Generate dependency graph for the helpers directory
 graph = DependencyGraph("helpers")
@@ -13,7 +14,11 @@ graph.build_graph()
 nx_graph = graph.graph
 
 # Filter out nodes with no dependencies (in-degree and out-degree both 0)
-nodes_to_remove = [node for node in nx_graph.nodes if nx_graph.in_degree(node) == 0 and nx_graph.out_degree(node) == 0]
+nodes_to_remove = [
+    node
+    for node in nx_graph.nodes
+    if nx_graph.in_degree(node) == 0 and nx_graph.out_degree(node) == 0
+]
 nx_graph.remove_nodes_from(nodes_to_remove)
 print(f"Removed {len(nodes_to_remove)} nodes with no dependencies")
 
