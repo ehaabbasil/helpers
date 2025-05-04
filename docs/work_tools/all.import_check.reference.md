@@ -28,12 +28,12 @@
 
 # show_imports
 
-A tool for visualizing dependencies among files and packages.
+`show_imports.py` is a tool for visualizing dependencies among files and packages.
 
 ## Basic usage
 
 ```bash
->./show_imports.py [flags] <target_directory>
+> show_imports.py [flags] <target_directory>
 ```
 
 The script will produce by default an output `.png` file named
