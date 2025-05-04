@@ -31,7 +31,7 @@ def _main():
             "##### commit-msg hook failed ######", "red"
         )
         print(msg)
-        print(("Your commit message doesn't match regex '%s'" % regex))
+        print("Your commit message doesn't match regex '%s'" % regex)
         print("E.g., 'Awesomely fix this and that' or 'Merge branch ...'")
         print()
         print(
@@ -40,19 +40,16 @@ def _main():
         )
         sys.exit(1)
     # Read pre-commit output.
-    get_git_root_dir = dshgghout.get_git_root_dir()
-    precommit_output_path = (
-        f"{get_git_root_dir}/.git/hooks/tmp.precommit_output.txt"
-    )
+    precommit_output_path = f"tmp.precommit_output.txt"
     try:
+        # We want to avoid using helpers here because we want to keep the
+        # script decoupled from helpers.
         with open(precommit_output_path, "r") as f:
             precommit_output = f.read().strip()
     except FileNotFoundError:
         precommit_output = "No pre-commit output found."
     # Format metadata and append to commit message.
-    metadata = "\n" + "\n".join(
-        [f"{line}" for line in precommit_output.splitlines()]
-    )
+    metadata = "\n" + precommit_output
     with open(message_file, "a") as f:
         f.write(metadata)
     msg = dshgghout.color_highlight(
